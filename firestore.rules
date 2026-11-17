@@ -1,0 +1,81 @@
+rules_version = '2';
+
+// Reglas de seguridad de Legacy Import
+// - El público puede ver el catálogo, crear pedidos y consultar el estado de su pedido.
+// - Solo los administradores (documento en /admins/{uid}) pueden ver pedidos y editar la tienda.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAdmin() {
+      return request.auth != null
+        && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+    function counterPath() { return /databases/$(database)/documents/meta/counter; }
+
+    match /settings/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /products/{id} {
+      allow read: if resource.data.visible == true || isAdmin();
+      allow write: if isAdmin();
+    }
+
+    // Fotos de productos y banners (comprimidas)
+    match /media/{id} {
+      allow read: if true;
+      allow write: if isAdmin() && request.resource.data.data is string && request.resource.data.data.size() < 1000000;
+    }
+
+    // Comprobantes de pago: el cliente solo puede crearlos; nadie más que el admin los lee
+    match /proofs/{id} {
+      allow create: if request.resource.data.keys().hasOnly(['data', 'createdAt'])
+        && request.resource.data.data is string
+        && request.resource.data.data.matches('^data:image/.*')
+        && request.resource.data.data.size() < 1000000;
+      allow read, delete: if isAdmin();
+    }
+
+    match /coupons/{code} {
+      allow get: if true;
+      allow list, create, delete: if isAdmin();
+      allow update: if isAdmin()
+        || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['uses'])
+            && request.resource.data.uses == resource.data.uses + 1);
+    }
+
+    // Contador de números de orden (LI-00001, LI-00002…): solo puede subir de uno en uno
+    match /meta/counter {
+      allow read: if true;
+      allow create: if request.resource.data.n == 1;
+      allow update: if request.resource.data.n == resource.data.n + 1 || isAdmin();
+    }
+
+    match /orders/{num} {
+      allow read, update, delete: if isAdmin();
+      allow create: if request.resource.data.number == num
+        && request.resource.data.n == getAfter(counterPath()).data.n
+        && (!exists(counterPath()) || getAfter(counterPath()).data.n == get(counterPath()).data.n + 1)
+        && request.resource.data.status in ['por_verificar', 'pendiente']
+        && !('stockApplied' in request.resource.data)
+        && request.resource.data.items is list
+        && request.resource.data.items.size() > 0
+        && request.resource.data.items.size() <= 60;
+    }
+
+    // Estado público del pedido (sin datos personales)
+    match /tracking/{num} {
+      allow get: if true;
+      allow list: if isAdmin();
+      allow create: if existsAfter(/databases/$(database)/documents/orders/$(num))
+        && request.resource.data.status in ['por_verificar', 'pendiente'];
+      allow update, delete: if isAdmin();
+    }
+
+    match /admins/{uid} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow write: if false;
+    }
+  }
+}

@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Legacy Import · Catálogo</title>
+  <meta name="description" content="Importadores directos de China. Bolsos, accesorios, termos, camisas y zapatos. Maracay, CC Galería Plaza. Envíos a toda Venezuela.">
+  <meta name="theme-color" content="#F8F3E8">
+  <meta property="og:title" content="Legacy Import · Catálogo">
+  <meta property="og:description" content="Detalles que elevan tu día. Compra en línea y paga con Pago Móvil, Zelle, Binance, Cashea o efectivo.">
+  <link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/store.css">
+</head>
+<body>
+  <a class="sr" href="#app">Saltar al catálogo</a>
+  <header class="top" id="top">
+    <div class="wrap top-row">
+      <a class="brand" href="#/" aria-label="Legacy Import, ir al catálogo" id="brand"></a>
+      <span class="where top-where-d" id="whereD"></span>
+      <label class="search" id="searchD">
+        <span class="sr">Buscar productos</span>
+        <span data-icon="search"></span>
+        <input type="search" placeholder="Buscar bolsos, camisas, termos…" autocomplete="off" data-search>
+        <button type="button" class="clear" data-clear aria-label="Borrar búsqueda"></button>
+      </label>
+      <a class="icon-btn" href="#/seguimiento" aria-label="Seguir mi pedido" title="Seguir mi pedido"><span data-icon="truck"></span></a>
+      <button class="icon-btn bag-btn" id="bagBtn" aria-label="Abrir la bolsa"><span data-icon="bag"></span><span class="count" id="bagCount">0</span></button>
+    </div>
+  </header>
+
+  <main id="app" tabindex="-1"></main>
+
+  <footer class="foot" id="foot"></footer>
+
+  <div class="scrim" id="scrim"></div>
+  <aside class="drawer" id="drawer" aria-label="Tu bolsa" aria-hidden="true">
+    <div class="drawer-head">
+      <h2>Tu bolsa <small id="bagN"></small></h2>
+      <button class="icon-btn" id="bagClose" aria-label="Cerrar la bolsa"><span data-icon="x"></span></button>
+    </div>
+    <div class="drawer-body" id="bagBody"></div>
+    <div class="drawer-foot" id="bagFoot"></div>
+  </aside>
+
+  <script type="module" src="js/store.js"></script>
+</body>
+</html>
